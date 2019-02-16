@@ -382,21 +382,16 @@ class PlayListManager:
                     self.offset = None
 
                 # Next
-                try:
-                    if self.play_next:
-                        p.send_signal(2)
-                        try:
-                            p.wait(timeout=1)
-                            break
-                        except subprocess.TimeoutExpired:
-                            p.terminate()
-                            break
-
+                if self.play_next:
+                    p.send_signal(2)
+                    try:
+                        p.wait(timeout=1)
                         self.play_next = False
-                except ValueError:
-                    p.kill()
-                    self.play_next = False
-                    break
+                        break
+                    except subprocess.TimeoutExpired:
+                        p.terminate()
+                        self.play_next = False
+                        break
 
                 # Force stop
                 if self.now_playing['tottime'] - self.now_playing['time'] < 0:
