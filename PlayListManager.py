@@ -60,7 +60,7 @@ class PlayListManager:
         try:
             self.ffserver = subprocess.Popen(
                         ["ffserver", "-f", var_set['ffserver_config']],
-                        stdout=subprocess.PIPE,
+                        stdout=subprocess.DEVNULL,
                         stderr=subprocess.STDOUT,
                         universal_newlines=True
                     )
@@ -169,7 +169,7 @@ class PlayListManager:
             savep = subprocess.Popen(
                 ["ffmpeg", "-i", "pipe:0", os.path.join(self.song_path, mp3_file_name)],
                 stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
+                stdout=subprocess.DEVNULL,
                 stderr=subprocess.STDOUT,
             )
             tmp_file = urlopen(req)
@@ -314,20 +314,27 @@ class PlayListManager:
             song_path = os.path.join(var_set['download_path'], 'song')
             mp3_file_path = os.path.join(song_path, nxt_song['mp3_file_name'])
             p = subprocess.Popen(
-                ["ffmpeg", "-re", "-i", mp3_file_path, "-filter:a", "loudnorm", "http://127.0.0.1:8090/feed1.ffm"],
+                ["ffmpeg", "-i", mp3_file_path],
                 stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True
+            )
+            while p.poll() is None:
+                p_time = re.search(r'Duration: (\d+):(\d+):(\d+).(\d+),', p.stdout.readline())
+                if p_time:
+                    self.now_playing['tottime'] = int(p_time.group(1)) * 3600 + int(p_time.group(2)) * 60 + int(p_time.group(3))
+                    break
+            p.kill()
+            p.wait()
+            p = subprocess.Popen(
+                ["ffmpeg", "-re", "-i", mp3_file_path, "-filter:a", "loudnorm", "http://127.0.0.1:8090/feed1.ffm"],
+                stdout=subprocess.DEVNULL,
                 stderr=subprocess.STDOUT,
                 universal_newlines=True
             )
             p_start_time = time.time()
             t = 0
             self.now_playing['time'] = t + int(time.time() - p_start_time)
-            while p.poll() is None:
-                p_time = re.search(r'Duration: (\d+):(\d+):(\d+).(\d+),', p.stdout.readline())
-                if p_time:
-                    self.now_playing['tottime'] = int(p_time.group(1)) * 3600 + int(p_time.group(2)) * 60 + int(p_time.group(3))
-                    break
-            time.sleep(0.01)
             self.now_playing['addtime'] = time.clock()
             while p.poll() is None:
                 time.sleep(0.1)
@@ -343,7 +350,7 @@ class PlayListManager:
                     p.kill()
                     silent = subprocess.Popen(
                         ["ffmpeg", "-re", "-f", "lavfi", "-i", "aevalsrc=0", "http://127.0.0.1:8090/feed1.ffm"],
-                        stdout=subprocess.PIPE,
+                        stdout=subprocess.DEVNULL,
                         stderr=subprocess.STDOUT,
                         universal_newlines=True
                     )
@@ -357,7 +364,7 @@ class PlayListManager:
                     p_start_time = time.time()
                     p = subprocess.Popen(
                         ["ffmpeg", "-ss", str(t), "-re", "-i", mp3_file_path, "-filter:a", "loudnorm", "http://127.0.0.1:8090/feed1.ffm"],
-                        stdout=subprocess.PIPE,
+                        stdout=subprocess.DEVNULL,
                         stderr=subprocess.STDOUT,
                         universal_newlines=True
                     )
