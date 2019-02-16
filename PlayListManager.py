@@ -53,9 +53,9 @@ class PlayListManager:
         self.play_next = False
         self.pause = False
         self.offset = None
-        self.volume = 0
         self.volume_set = list(var_set['volume_set'])
         self.volume_idx = self.volume_set.index(100) if 100 in self.volume_set else 0
+        self.volume = self.volume_set[self.volume_idx]
         self.db = JsonDB()
         self.now_adding = []
         self.now_playing = {}
