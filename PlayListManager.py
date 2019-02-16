@@ -304,6 +304,9 @@ class PlayListManager:
 
     def _player(self):
         while True:
+            while not self.db.objects:
+                time.sleep(0.1)
+
             # get next song
             if not self.q_new_song.empty():
                 nxt_song = self.q_new_song.get()
