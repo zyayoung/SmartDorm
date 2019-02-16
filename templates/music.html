@@ -24,6 +24,8 @@ progress::-webkit-progress-value
     <span>{{ now.song_name }}</span>
     </div>
     <div class="row pull-right">
+    <div class="btn-group mr-3" role="group"><a class="btn btn-outline-primary" href="music/player" target="_blank"><i class="fa fa-play-circle" aria-hidden="true"></i></a>
+    </div>
     <div class="btn-group mr-3" role="group">
         <a class="btn btn-outline-primary" href="?command=vdown"><i class="fa fa-volume-down" aria-hidden="true"></i></a>
         <a class="btn btn-outline-primary" href="#">{{ volume }}%</a>
@@ -80,7 +82,11 @@ progress::-webkit-progress-value
 <script>
     $('#message').hide();
     var starttime = new Date();
-    starttime = starttime.getTime()-{{ now.time }}*1000;
+    {% if now.time %}
+    starttime = starttime.getTime() - {{ now.time }} * 1000;
+    {% else %}
+    starttime = starttime.getTime();
+    {% endif %}
 
     function ajaxSubmit() {
         $('#message').html('申请已发出，请等待');
@@ -93,7 +99,7 @@ progress::-webkit-progress-value
                 'name': $('#id_name').val(),
             },
             success: function (arg) {
-                window.location = "/music"
+                window.location = "/music";
             }
         });
         $('#id_name').val('');

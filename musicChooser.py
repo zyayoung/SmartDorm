@@ -4,7 +4,9 @@ import argparse
 import random
 import string
 import PlayListManager
+import json
 
+var_set = json.load(open('config.json'))
 play_list_manager = PlayListManager.PlayListManager()
 
 SECRET_KEY = 'BoYanZhhhh'
@@ -42,6 +44,11 @@ def music_del():
         song_id = request.args.get('id')
         play_list_manager.del_song_by_id_or_av(song_id)
     return redirect('/music')
+
+
+@app.route('/music/player')
+def music_player():
+    return render_template('player.html', src=var_set['http_src'])
 
 
 @app.route('/music')

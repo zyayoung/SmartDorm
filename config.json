@@ -1,5 +1,6 @@
 {
   "download_path": "./download",
   "ffserver_config": "./ffserver.conf",
-  "volume_set": [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+  "volume_set": [0, 25, 50, 75, 100, 125, 150, 175, 200, 250, 300],
+  "http_src": "http://sstia.tech:18090/lite.mp3"
 }

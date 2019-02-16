@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Index{% endblock %}
+{% block content %}
+<div id="audioholder">
+<audio controls src="{{ src }}" id="0" autoplay></audio>
+</div>
+{% endblock %}
+{% block script %}
+<script>
+var a = $('#0');
+a.bind('canplay', function () {
+   this.play();
+});
+a.bind('ended', function(){
+    this.remove();
+});
+var id = 1;
+var src = "{{ src }}";
+function f() {
+    if(a[0].duration && a[0].duration !== Infinity){
+        let audio = $('<audio controls src="'+src+'" id="'+id+'" autoplay></audio>');
+        $('#audioholder').append(audio);
+        a = $('#'+id);
+        a.bind('canplay', function () {
+           this.play();
+        });
+        a.bind('ended', function(){
+            this.remove();
+        });
+        id += 1;
+    }
+}
+setInterval(f, 200);
+</script>
+{% endblock %}
