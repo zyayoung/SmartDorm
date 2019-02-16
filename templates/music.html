@@ -25,6 +25,10 @@ progress::-webkit-progress-value
     </div>
     <div class="row pull-right">
     <div class="btn-group mr-3" role="group">
+        <a class="btn btn-outline-primary" href="?command=vup"><i class="fa fa-volume-up" aria-hidden="true"></i></a>
+        <a class="btn btn-outline-primary" href="?command=vdown"><i class="fa fa-volume-down" aria-hidden="true"></i></a>
+    </div>
+    <div class="btn-group mr-3" role="group">
         {% if paused %}
         <a class="btn btn-outline-primary" href="?command=start"><i class="fa fa-play" aria-hidden="true"></i></a>
         {% else %}
@@ -38,10 +42,6 @@ progress::-webkit-progress-value
             <i class="fa fa-search" aria-hidden="true"></i>
         </button>
     </form>
-    </div>
-    <div class="btn-group pull-right" role="group">
-        <a class="btn btn-outline-primary" href="?command=vup"><i class="fa fa-volume-up" aria-hidden="true"></i></a>
-        <a class="btn btn-outline-primary" href="?command=vdown"><i class="fa fa-volume-down" aria-hidden="true"></i></a>
     </div>
 </div>
 <progress value='{{ now.time }}' max='{{ now.tottime }}' class="col-12" id="id_progress"></progress>

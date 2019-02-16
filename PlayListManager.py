@@ -156,7 +156,6 @@ class PlayListManager:
             song_tname = info['data']['tname']
             song_uploader = info['data']['owner']['name']
 
-
             # download song
             mp3_file_name = 'av%012d' % song_id + '.mp3'
 
@@ -334,7 +333,13 @@ class PlayListManager:
             p.kill()
             p.wait()
             p = subprocess.Popen(
-                ["ffmpeg", "-re", "-i", mp3_file_path, "-filter:a", "loudnorm", "-af", "volume={}dB".format(self.volume), "http://127.0.0.1:8090/feed1.ffm"],
+                [
+                    "ffmpeg",
+                    "-re",
+                    "-i", mp3_file_path,
+                    "-filter:a", "loudnorm=I={}".format(self.volume),
+                    "http://127.0.0.1:8090/feed1.ffm"
+                ],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.STDOUT,
                 universal_newlines=True
@@ -356,7 +361,13 @@ class PlayListManager:
                         p.terminate()
                     p.kill()
                     silent = subprocess.Popen(
-                        ["ffmpeg", "-re", "-f", "lavfi", "-i", "aevalsrc=0", "http://127.0.0.1:8090/feed1.ffm"],
+                        [
+                            "ffmpeg",
+                            "-re",
+                            "-f", "lavfi",
+                            "-i", "aevalsrc=0",
+                            "http://127.0.0.1:8090/feed1.ffm"
+                        ],
                         stdout=subprocess.DEVNULL,
                         stderr=subprocess.STDOUT,
                         universal_newlines=True
@@ -381,7 +392,14 @@ class PlayListManager:
                     print("Starting at", self.offset)
                     p_start_time = time.time()
                     p = subprocess.Popen(
-                        ["ffmpeg", "-ss", str(self.offset), "-re", "-i", mp3_file_path, "-filter:a", "loudnorm", "-af", "volume={}dB".format(self.volume), "http://127.0.0.1:8090/feed1.ffm"],
+                        [
+                            "ffmpeg",
+                            "-ss", str(self.offset),
+                            "-re",
+                            "-i", mp3_file_path,
+                            "-filter:a", "loudnorm=I={}".format(self.volume),
+                            "http://127.0.0.1:8090/feed1.ffm"
+                        ],
                         stdout=subprocess.DEVNULL,
                         stderr=subprocess.STDOUT,
                         universal_newlines=True
