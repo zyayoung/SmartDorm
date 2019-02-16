@@ -77,21 +77,15 @@ class PlayListManager:
         self.player = td.Thread(target=self._player, name='Player')
         self.player.start()
 
-    def vupdate(self):
-        self.set_offset(self.now_playing['time'])
-
     def vup(self):
         if self.volume_idx + 1 < len(self.volume_set):
             self.volume_idx = self.volume_idx + 1
             self.volume = self.volume_set[self.volume_idx]
-        self.vupdate()
 
     def vdown(self):
         if self.volume_idx > 0:
             self.volume_idx = self.volume_idx - 1
             self.volume = self.volume_set[self.volume_idx]
-        self.vupdate()
-
 
     def next(self, wait=True):
         old_time = self.now_playing['addtime'] if 'addtime' in self.now_playing else 0
@@ -359,6 +353,8 @@ class PlayListManager:
             t = 0
             self.now_playing['time'] = t + int(time.time() - p_start_time)
             self.now_playing['addtime'] = time.clock()
+            volume_old = self.volume
+            v_countdown = 20
             while p.poll() is None:
                 self.now_playing['time'] = t + int(time.time() - p_start_time)
                 time.sleep(0.1)
@@ -389,6 +385,13 @@ class PlayListManager:
                     silent.send_signal(2)
                     silent.kill()
                     self.set_offset(t)
+
+                if self.volume != volume_old:
+                    v_countdown -= 1
+                    if v_countdown <= 0:
+                        self.set_offset(t)
+                else:
+                    v_countdown = 20
 
                 # Offset
                 if self.offset:
