@@ -1,0 +1,4 @@
+{
+  "download_path": "./download",
+  "ffserver_config": "./ffserver.conf"
+}
