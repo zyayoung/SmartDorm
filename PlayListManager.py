@@ -55,17 +55,17 @@ class PlayListManager:
         self.offset = None
         self.volume = 0
         self.volume_set = list(var_set['volume_set'])
-        self.volume_idx = self.volume_set.index(0) if 0 in self.volume_set else 0
+        self.volume_idx = self.volume_set.index(100) if 100 in self.volume_set else 0
         self.db = JsonDB()
         self.now_adding = []
         self.now_playing = {}
         try:
             self.ffserver = subprocess.Popen(
-                        ["ffserver", "-f", var_set['ffserver_config']],
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.STDOUT,
-                        universal_newlines=True
-                    )
+                ["ffserver", "-f", var_set['ffserver_config']],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True
+            )
         except FileNotFoundError:
             print("ffserver not found!")
 
@@ -341,7 +341,7 @@ class PlayListManager:
                     "ffmpeg",
                     "-re",
                     "-i", mp3_file_path,
-                    # "-filter:a", "loudnorm=I={}:LRA=7:tp=-2".format(self.volume),
+                    "-filter:a", "loudnorm",
                     "-vol", "{}".format(self.volume),
                     "http://127.0.0.1:8090/feed1.ffm"
                 ],
@@ -402,7 +402,7 @@ class PlayListManager:
                             "-ss", str(self.offset),
                             "-re",
                             "-i", mp3_file_path,
-                            # "-filter:a", "loudnorm=I={}:LRA=7:tp=-2".format(self.volume),
+                            "-filter:a", "loudnorm",
                             "-vol", "{}".format(self.volume),
                             "http://127.0.0.1:8090/feed1.ffm"
                         ],
