@@ -301,9 +301,12 @@ class PlayListManager:
             print('shit')
             print(e)
 
-    def set_offset(self, offset):
+    def set_offset_by_ratio(self, ratio):
         if 'tottime' in self.now_playing:
-            self.offset = int(self.now_playing['tottime'] * offset)
+            self.offset = int(self.now_playing['tottime'] * ratio)
+
+    def set_offset(self, offset):
+        self.offset = offset
 
     def _player(self):
         while True:
