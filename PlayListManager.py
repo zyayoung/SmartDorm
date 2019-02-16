@@ -303,7 +303,7 @@ class PlayListManager:
 
     def set_offset(self, offset):
         if 'tottime' in self.now_playing:
-            self.offset = self.now_playing['tottime'] * offset
+            self.offset = int(self.now_playing['tottime'] * offset)
 
     def _player(self):
         while True:
@@ -367,20 +367,6 @@ class PlayListManager:
                     self.set_offset(t)
                     time.sleep(0.1)
 
-                # Next
-                try:
-                    if self.play_next:
-                        p.send_signal(2)
-                        self.play_next = False
-                        try:
-                            p.wait(timeout=1)
-                        except subprocess.TimeoutExpired:
-                            p.terminate()
-                            break
-                except ValueError:
-                    p.kill()
-                    self.play_next = False
-
                 # Offset
                 if self.offset:
                     print("Starting at", self.offset)
@@ -392,6 +378,22 @@ class PlayListManager:
                         universal_newlines=True
                     )
                     self.offset = None
+
+                # Next
+                try:
+                    if self.play_next:
+                        p.send_signal(2)
+                        self.play_next = False
+                        try:
+                            p.wait(timeout=1)
+                            break
+                        except subprocess.TimeoutExpired:
+                            p.terminate()
+                            break
+                except ValueError:
+                    p.kill()
+                    self.play_next = False
+                    break
 
                 # Force stop
                 if self.now_playing['tottime'] - self.now_playing['time'] < 0:
