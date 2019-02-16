@@ -79,7 +79,7 @@ progress::-webkit-progress-value
 <script>
     $('#message').hide();
     var starttime = new Date();
-    starttime = starttime.getTime()-$('#id_progress').val()*1000;
+    starttime = starttime.getTime()-{{ now.time }}*1000;
 
     function ajaxSubmit() {
         $('#message').html('申请已发出，请等待');

@@ -79,6 +79,7 @@ class PlayListManager:
     def next(self, wait=True):
         old_time = self.now_playing['addtime'] if 'addtime' in self.now_playing else 0
         self.play_next = True
+        self.now_playing['time'] = 0
         if wait:
             # wait
             while self.play_next or 'addtime' not in self.now_playing or self.now_playing['addtime'] == old_time:
