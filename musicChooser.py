@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect
 from queue import Queue
 import argparse
+import time
 import sys
 import random
 import string
@@ -54,11 +55,22 @@ def musicList():
     return re
 
 
+@app.route('/music/del')
+def music_del():
+    if request.args.get('id') is not None:
+        id = request.args.get('id')
+        play_list_manager.del_song_by_id_or_av(id)
+    return redirect('/music')
+
+
 @app.route('/music')
 def music():
     if request.args.get('id') is not None:
-        id = int(request.args.get('id'))
-        play_list_manager.add_song_by_id(id)
+        id = request.args.get('id')
+        if id.startswith('av'):
+            play_list_manager.add_song_by_av(int(id[2:]))
+        else:
+            play_list_manager.add_song_by_id(int(id))
         return redirect('/music')
     elif request.args.get('command') is not None:
         command = request.args.get('command')
@@ -79,7 +91,7 @@ def music():
     for obj in play_list_manager.db.objects:
         re += '<p>{id}.<a href="?id={id}">{name}</a></p>\n'.format(
             id=obj['song_id'], name=obj['song_name'])
-    return render_template('music.html', re=re, data_list=play_list_manager.db.objects)
+    return render_template('music.html', now=play_list_manager.now_playing, paused=play_list_manager.pause, data_list=play_list_manager.db.objects)
 
 
 if __name__ == "__main__":
