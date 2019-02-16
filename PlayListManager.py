@@ -350,17 +350,17 @@ class PlayListManager:
                 universal_newlines=True
             )
             p_start_time = time.time()
-            t = 0
-            self.now_playing['time'] = t + int(time.time() - p_start_time)
+            p_start_time_offset = 0
+            self.now_playing['time'] = p_start_time_offset + int(time.time() - p_start_time)
             self.now_playing['addtime'] = time.clock()
             volume_old = self.volume
             v_countdown = 20
             while p.poll() is None:
-                self.now_playing['time'] = t + int(time.time() - p_start_time)
+                self.now_playing['time'] = p_start_time_offset + int(time.time() - p_start_time)
                 time.sleep(0.1)
                 # Pause
                 if self.pause:
-                    t += int(time.time() - p_start_time)
+                    p_start_time_offset += int(time.time() - p_start_time)
                     p.send_signal(2)
                     try:
                         p.wait(timeout=1)
@@ -379,24 +379,24 @@ class PlayListManager:
                         stderr=subprocess.STDOUT,
                         universal_newlines=True
                     )
-                    print("Paused, will start at", t)
+                    print("Paused, will start at", p_start_time_offset)
                     while self.pause:
                         time.sleep(0.01)
                     silent.send_signal(2)
                     silent.kill()
-                    self.set_offset(t)
+                    self.set_offset(p_start_time_offset)
 
                 if self.volume != volume_old:
                     v_countdown -= 1
                     if v_countdown <= 0:
-                        self.set_offset(t)
+                        self.set_offset(self.now_playing['time'])
                         volume_old = self.volume
                 else:
                     v_countdown = 20
 
                 # Offset
                 if self.offset:
-                    t = self.offset
+                    p_start_time_offset = self.offset
                     if p.poll() is None:
                         p.send_signal(2)
                         try:
