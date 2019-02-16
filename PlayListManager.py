@@ -301,12 +301,16 @@ class PlayListManager:
             print('shit')
             print(e)
 
-    def set_offset_by_ratio(self, ratio):
+    def set_offset_by_ratio(self, ratio, wait=False):
         if 'tottime' in self.now_playing:
             self.offset = int(self.now_playing['tottime'] * ratio)
+        while self.offset and wait:
+            time.sleep(0.01)
 
-    def set_offset(self, offset):
+    def set_offset(self, offset, wait=False):
         self.offset = offset
+        while self.offset and wait:
+            time.sleep(0.01)
 
     def _player(self):
         while True:
@@ -388,7 +392,6 @@ class PlayListManager:
                         universal_newlines=True
                     )
                     self.offset = None
-                    time.sleep(0.1)
 
                 # Next
                 try:
