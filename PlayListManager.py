@@ -55,6 +55,7 @@ class PlayListManager:
         self.play_next = False
         self.pause = False
         self.offset = None
+        self.volume = 0
         self.db = JsonDB()
         self.now_adding = []
         self.now_playing = {}
@@ -75,6 +76,12 @@ class PlayListManager:
             os.mkdir(self.song_path)
         self.player = td.Thread(target=self._player, name='Player')
         self.player.start()
+
+    def vup(self):
+        self.volume += 5
+
+    def vdown(self):
+        self.volume -= 5
 
     def next(self, wait=True):
         old_time = self.now_playing['addtime'] if 'addtime' in self.now_playing else 0
@@ -327,7 +334,7 @@ class PlayListManager:
             p.kill()
             p.wait()
             p = subprocess.Popen(
-                ["ffmpeg", "-re", "-i", mp3_file_path, "-filter:a", "loudnorm", "http://127.0.0.1:8090/feed1.ffm"],
+                ["ffmpeg", "-re", "-i", mp3_file_path, "-filter:a", "loudnorm", "-af", "volume={}dB".format(self.volume), "http://127.0.0.1:8090/feed1.ffm"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.STDOUT,
                 universal_newlines=True
@@ -374,7 +381,7 @@ class PlayListManager:
                     print("Starting at", self.offset)
                     p_start_time = time.time()
                     p = subprocess.Popen(
-                        ["ffmpeg", "-ss", str(self.offset), "-re", "-i", mp3_file_path, "-filter:a", "loudnorm", "http://127.0.0.1:8090/feed1.ffm"],
+                        ["ffmpeg", "-ss", str(self.offset), "-re", "-i", mp3_file_path, "-filter:a", "loudnorm", "-af", "volume={}dB".format(self.volume), "http://127.0.0.1:8090/feed1.ffm"],
                         stdout=subprocess.DEVNULL,
                         stderr=subprocess.STDOUT,
                         universal_newlines=True
