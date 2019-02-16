@@ -54,6 +54,7 @@ class PlayListManager:
         self.q_new_song = Queue()
         self.play_next = False
         self.pause = False
+        self.offset = None
         self.db = JsonDB()
         self.now_adding = []
         self.now_playing = {}
@@ -300,6 +301,10 @@ class PlayListManager:
             print('shit')
             print(e)
 
+    def set_offset(self, offset):
+        if 'tottime' in self.now_playing:
+            self.offset = self.now_playing['tottime'] * offset
+
     def _player(self):
         while True:
             while not self.db.objects:
@@ -359,15 +364,8 @@ class PlayListManager:
                         time.sleep(0.01)
                     silent.send_signal(2)
                     silent.kill()
+                    self.set_offset(t)
                     time.sleep(0.1)
-                    print("Starting at", t)
-                    p_start_time = time.time()
-                    p = subprocess.Popen(
-                        ["ffmpeg", "-ss", str(t), "-re", "-i", mp3_file_path, "-filter:a", "loudnorm", "http://127.0.0.1:8090/feed1.ffm"],
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.STDOUT,
-                        universal_newlines=True
-                    )
 
                 # Next
                 try:
@@ -382,6 +380,18 @@ class PlayListManager:
                 except ValueError:
                     p.kill()
                     self.play_next = False
+
+                # Offset
+                if self.offset:
+                    print("Starting at", self.offset)
+                    p_start_time = time.time()
+                    p = subprocess.Popen(
+                        ["ffmpeg", "-ss", str(self.offset), "-re", "-i", mp3_file_path, "-filter:a", "loudnorm", "http://127.0.0.1:8090/feed1.ffm"],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.STDOUT,
+                        universal_newlines=True
+                    )
+                    self.offset = None
 
                 # Force stop
                 if self.now_playing['tottime'] - self.now_playing['time'] < 0:

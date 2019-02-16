@@ -97,18 +97,22 @@ progress::-webkit-progress-value
         });
         $('#id_name').val('');
     }
-    {% if not paused %}
+    {% if data_list and not paused %}
     var refresh = false;
     function updateProgress(){
         let p = $('#id_progress');
         let time = new Date();
         p.val((time.getTime()-starttime)/1000);
-        if(!refresh && p.attr('max') - p.attr('value') < 0.2){
+        if(!refresh && p.attr('max') - (time.getTime()-starttime)/1000 < -1){
             refresh = true;
-            setTimeout("window.location = '/music';", 1000);
+            window.location = '/music';
         }
     }
     setInterval("updateProgress();", 200);
     {% endif %}
+    var p = $("progress");
+    p.bind("mouseup",function(a){
+        window.location = '/music?offset='+a.offsetX/p.innerWidth();
+    });
 </script>
 {% endblock %}

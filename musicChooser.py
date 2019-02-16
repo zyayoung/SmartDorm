@@ -65,6 +65,10 @@ def music_del():
 
 @app.route('/music')
 def music():
+    if request.args.get('offset') is not None:
+        offset = float(request.args.get('offset'))
+        play_list_manager.set_offset(offset)
+        return redirect('/music')
     if request.args.get('id') is not None:
         id = request.args.get('id')
         if id.startswith('av'):
