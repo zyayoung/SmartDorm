@@ -76,8 +76,13 @@ class PlayListManager:
         self.player = td.Thread(target=self._player, name='Player')
         self.player.start()
 
-    def next(self):
+    def next(self, wait=True):
+        old_time = self.now_playing['addtime'] if 'addtime' in self.now_playing else 0
         self.play_next = True
+        if wait:
+            # wait
+            while 'addtime' not in self.now_playing or self.now_playing['addtime'] == old_time:
+                time.sleep(0.01)
         return
 
     def add_song_by_name_or_link(self, name):
@@ -397,13 +402,14 @@ class PlayListManager:
                 try:
                     if self.play_next:
                         p.send_signal(2)
-                        self.play_next = False
                         try:
                             p.wait(timeout=1)
                             break
                         except subprocess.TimeoutExpired:
                             p.terminate()
                             break
+
+                        self.play_next = False
                 except ValueError:
                     p.kill()
                     self.play_next = False
