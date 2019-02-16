@@ -25,8 +25,11 @@ progress::-webkit-progress-value
     </div>
     <div class="row pull-right">
     <div class="btn-group mr-3" role="group">
+        {% if paused %}
         <a class="btn btn-outline-primary" href="?command=start"><i class="fa fa-play" aria-hidden="true"></i></a>
+        {% else %}
         <a class="btn btn-outline-primary" href="?command=pause"><i class="fa fa-pause" aria-hidden="true"></i></a>
+        {% endif %}
         <a class="btn btn-outline-primary" href="?command=next"><i class="fa fa-step-forward" aria-hidden="true"></i></a>
     </div>
     <form class="form-inline" onsubmit="ajaxSubmit();return false;">

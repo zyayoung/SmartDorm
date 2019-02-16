@@ -177,11 +177,10 @@ class PlayListManager:
             )
             tmp_file = urlopen(req)
             while True:
-                buf = tmp_file.read(1024)
+                buf = tmp_file.read(128)
                 savep.stdin.write(buf)
                 savep.stdin.flush()
-                if len(buf) < 1024 or buf[-1] == b'\0':
-                    print(len(buf), buf[-1])
+                if len(buf) < 128 or buf[-1] == b'\0':
                     break
 
             savep.stdin.write(b'\0')
@@ -315,7 +314,7 @@ class PlayListManager:
             song_path = os.path.join(var_set['download_path'], 'song')
             mp3_file_path = os.path.join(song_path, nxt_song['mp3_file_name'])
             p = subprocess.Popen(
-                ["ffmpeg", "-re", "-i", mp3_file_path, "http://127.0.0.1:8090/feed1.ffm"],
+                ["ffmpeg", "-re", "-i", mp3_file_path, "-filter:a", "loudnorm", "http://127.0.0.1:8090/feed1.ffm"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 universal_newlines=True
@@ -337,7 +336,10 @@ class PlayListManager:
                 if self.pause:
                     t += int(time.time() - p_start_time)
                     p.send_signal(2)
-                    p.wait()
+                    try:
+                        p.wait(timeout=1)
+                    except subprocess.TimeoutExpired:
+                        p.terminate()
                     p.kill()
                     silent = subprocess.Popen(
                         ["ffmpeg", "-re", "-f", "lavfi", "-i", "aevalsrc=0", "http://127.0.0.1:8090/feed1.ffm"],
@@ -349,13 +351,12 @@ class PlayListManager:
                     while self.pause:
                         time.sleep(0.01)
                     silent.send_signal(2)
-                    silent.wait()
                     silent.kill()
                     time.sleep(0.1)
                     print("Starting at", t)
                     p_start_time = time.time()
                     p = subprocess.Popen(
-                        ["ffmpeg", "-ss", str(t), "-re", "-i", mp3_file_path, "http://127.0.0.1:8090/feed1.ffm"],
+                        ["ffmpeg", "-ss", str(t), "-re", "-i", mp3_file_path, "-filter:a", "loudnorm", "http://127.0.0.1:8090/feed1.ffm"],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.STDOUT,
                         universal_newlines=True
@@ -366,7 +367,11 @@ class PlayListManager:
                     if self.play_next:
                         p.send_signal(2)
                         self.play_next = False
-                        p.wait()
+                        try:
+                            p.wait(timeout=1)
+                        except subprocess.TimeoutExpired:
+                            p.terminate()
+                            break
                 except ValueError:
                     p.kill()
                     self.play_next = False
@@ -378,6 +383,6 @@ class PlayListManager:
                         p.wait(timeout=1)
                     except subprocess.TimeoutExpired:
                         p.terminate()
-                        pass
+                        break
             # print('FFmpeg Ended with code', p.poll())
             p.kill()
