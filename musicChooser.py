@@ -77,11 +77,14 @@ def music():
              <a href="?command=vdown">vdown</a></p>'
     for obj in play_list_manager.db.objects:
         re += '<p>{id}.<a href="?id={id}">{name}</a></p>\n'.format(
-            id=obj['song_id'], name=obj['song_name'])
+            id=obj['song_id'],
+            name=obj['song_name']
+        )
     return render_template(
         'music.html',
         now=play_list_manager.now_playing,
         paused=play_list_manager.pause,
+        volume=play_list_manager.volume,
         data_list=play_list_manager.db.objects
     )
 

@@ -1,7 +1,6 @@
 # coding = utf-8
 import os
 import time
-import signal
 import re
 import threading as td
 from queue import Queue
@@ -10,7 +9,6 @@ from urllib.request import urlopen, urlretrieve, Request
 from urllib.parse import urlencode
 import json
 import subprocess
-import glob
 import signal
 
 var_set = json.load(open('config.json'))
@@ -56,6 +54,8 @@ class PlayListManager:
         self.pause = False
         self.offset = None
         self.volume = 0
+        self.volume_set = list(var_set['volume_set'])
+        self.volume_idx = self.volume_set.index(0) if 0 in self.volume_set else 0
         self.db = JsonDB()
         self.now_adding = []
         self.now_playing = {}
@@ -78,10 +78,14 @@ class PlayListManager:
         self.player.start()
 
     def vup(self):
-        self.volume += 5
+        if self.volume_idx < len(self.volume_set):
+            self.volume_idx = self.volume_idx + 1
+            self.volume = self.volume_set[self.volume_idx]
 
     def vdown(self):
-        self.volume -= 5
+        if self.volume_idx > 0:
+            self.volume_idx = self.volume_idx - 1
+            self.volume = self.volume_set[self.volume_idx]
 
     def next(self, wait=True):
         old_time = self.now_playing['addtime'] if 'addtime' in self.now_playing else 0
@@ -337,7 +341,7 @@ class PlayListManager:
                     "ffmpeg",
                     "-re",
                     "-i", mp3_file_path,
-                    "-filter:a", "loudnorm=I={}".format(self.volume),
+                    "-filter:a", "loudnorm=I={}:LRA=7:tp=-2".format(self.volume),
                     "http://127.0.0.1:8090/feed1.ffm"
                 ],
                 stdout=subprocess.DEVNULL,
@@ -397,7 +401,7 @@ class PlayListManager:
                             "-ss", str(self.offset),
                             "-re",
                             "-i", mp3_file_path,
-                            "-filter:a", "loudnorm=I={}".format(self.volume),
+                            "-filter:a", "loudnorm=I={}:LRA=7:tp=-2".format(self.volume),
                             "http://127.0.0.1:8090/feed1.ffm"
                         ],
                         stdout=subprocess.DEVNULL,
