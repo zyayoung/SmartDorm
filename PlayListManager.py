@@ -369,6 +369,13 @@ class PlayListManager:
 
                 # Offset
                 if self.offset:
+                    t = self.offset
+                    p.send_signal(2)
+                    try:
+                        p.wait(timeout=1)
+                    except subprocess.TimeoutExpired:
+                        p.terminate()
+                    p.kill()
                     print("Starting at", self.offset)
                     p_start_time = time.time()
                     p = subprocess.Popen(
