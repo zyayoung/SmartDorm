@@ -172,10 +172,10 @@ class PlayListManager:
             )
             tmp_file = urlopen(req)
             while True:
-                buf = tmp_file.read(128)
+                buf = tmp_file.read(1024)
                 savep.stdin.write(buf)
                 savep.stdin.flush()
-                if len(buf) < 128 or buf[-1] == b'\0':
+                if len(buf) < 1024 or buf[-1] == b'\0':
                     break
 
             savep.stdin.write(b'\0')
