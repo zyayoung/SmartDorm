@@ -67,7 +67,7 @@ def music_del():
 def music():
     if request.args.get('offset') is not None:
         offset = float(request.args.get('offset'))
-        play_list_manager.set_offset_by_ratio(offset)
+        play_list_manager.set_offset_by_ratio(offset, wait=True)
         return redirect('/music')
     if request.args.get('id') is not None:
         id = request.args.get('id')
