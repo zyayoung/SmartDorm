@@ -101,8 +101,8 @@ progress::-webkit-progress-value
     var refresh = false;
     function updateProgress(){
         let p = $('#id_progress');
-        let time = new Date();
-        p.val((time.getTime()-starttime)/1000);
+        let timenow = new Date();
+        p.val((timenow.getTime()-starttime)/1000);
         if(!refresh && p.attr('max') - (time.getTime()-starttime)/1000 < -1){
             refresh = true;
             window.location = '/music';

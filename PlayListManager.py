@@ -79,11 +79,11 @@ class PlayListManager:
     def next(self, wait=True):
         old_time = self.now_playing['addtime'] if 'addtime' in self.now_playing else 0
         self.play_next = True
-        self.now_playing['time'] = 0
         if wait:
             # wait
             while self.play_next or 'addtime' not in self.now_playing or self.now_playing['addtime'] == old_time:
                 time.sleep(0.01)
+        self.now_playing['time'] = 0
         return
 
     def add_song_by_name_or_link(self, name):
@@ -127,7 +127,6 @@ class PlayListManager:
             if song_id in self.now_adding:
                 return
             self.now_adding.append(song_id)
-            old_time = self.now_playing['addtime'] if 'addtime' in self.now_playing else 0
             # check id
             old_obj = self.db.get_object_by_key('song_id', 'av{}'.format(song_id))
             if old_obj:
@@ -219,7 +218,6 @@ class PlayListManager:
             if song_id in self.now_adding:
                 return
             self.now_adding.append(song_id)
-            old_time = self.now_playing['addtime'] if 'addtime' in self.now_playing else 0
             # check id
             old_obj = self.db.get_object_by_key('song_id', song_id)
             if old_obj:
@@ -312,6 +310,7 @@ class PlayListManager:
             else:
                 nxt_song = random.choice(self.db.objects)
             self.now_playing = nxt_song
+            self.now_playing['time'] = 0
             song_path = os.path.join(var_set['download_path'], 'song')
             mp3_file_path = os.path.join(song_path, nxt_song['mp3_file_name'])
             p = subprocess.Popen(
