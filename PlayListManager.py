@@ -341,7 +341,8 @@ class PlayListManager:
                     "ffmpeg",
                     "-re",
                     "-i", mp3_file_path,
-                    "-filter:a", "loudnorm=I={}:LRA=7:tp=-2".format(self.volume),
+                    # "-filter:a", "loudnorm=I={}:LRA=7:tp=-2".format(self.volume),
+                    "-af", "volume={}dB".format(self.volume),
                     "http://127.0.0.1:8090/feed1.ffm"
                 ],
                 stdout=subprocess.DEVNULL,
@@ -401,7 +402,8 @@ class PlayListManager:
                             "-ss", str(self.offset),
                             "-re",
                             "-i", mp3_file_path,
-                            "-filter:a", "loudnorm=I={}:LRA=7:tp=-2".format(self.volume),
+                            # "-filter:a", "loudnorm=I={}:LRA=7:tp=-2".format(self.volume),
+                            "-af", "volume={}dB".format(self.volume),
                             "http://127.0.0.1:8090/feed1.ffm"
                         ],
                         stdout=subprocess.DEVNULL,
