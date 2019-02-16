@@ -365,7 +365,6 @@ class PlayListManager:
                     silent.send_signal(2)
                     silent.kill()
                     self.set_offset(t)
-                    time.sleep(0.1)
 
                 # Offset
                 if self.offset:
@@ -385,6 +384,7 @@ class PlayListManager:
                         universal_newlines=True
                     )
                     self.offset = None
+                    time.sleep(0.1)
 
                 # Next
                 try:
