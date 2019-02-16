@@ -72,8 +72,6 @@ class PlayListManager:
         if not os.path.exists(var_set['download_path']):
             os.mkdir(var_set['download_path'])
             os.mkdir(self.song_path)
-            self.add_song_by_id(521416315)
-
         self.player = td.Thread(target=self._player, name='Player')
         self.player.start()
 
