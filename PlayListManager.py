@@ -390,6 +390,7 @@ class PlayListManager:
                     v_countdown -= 1
                     if v_countdown <= 0:
                         self.set_offset(t)
+                        volume_old = self.volume
                 else:
                     v_countdown = 20
 
