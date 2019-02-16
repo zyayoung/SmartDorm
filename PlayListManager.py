@@ -345,8 +345,8 @@ class PlayListManager:
             self.now_playing['time'] = t + int(time.time() - p_start_time)
             self.now_playing['addtime'] = time.clock()
             while p.poll() is None:
-                time.sleep(0.1)
                 self.now_playing['time'] = t + int(time.time() - p_start_time)
+                time.sleep(0.1)
                 # Pause
                 if self.pause:
                     t += int(time.time() - p_start_time)
