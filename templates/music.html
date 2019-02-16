@@ -39,10 +39,10 @@ progress::-webkit-progress-value
         </button>
     </form>
     </div>
-{#    <div class="btn-group pull-right" role="group">#}
-{#        <a class="btn btn-outline-primary" href="?command=vup"><i class="fa fa-volume-up" aria-hidden="true"></i></a>#}
-{#        <a class="btn btn-outline-primary" href="?command=vdown"><i class="fa fa-volume-down" aria-hidden="true"></i></a>#}
-{#    </div>#}
+    <div class="btn-group pull-right" role="group">
+        <a class="btn btn-outline-primary" href="?command=vup"><i class="fa fa-volume-up" aria-hidden="true"></i></a>
+        <a class="btn btn-outline-primary" href="?command=vdown"><i class="fa fa-volume-down" aria-hidden="true"></i></a>
+    </div>
 </div>
 <progress value='{{ now.time }}' max='{{ now.tottime }}' class="col-12" id="id_progress"></progress>
 {% if data_list %}
