@@ -12,6 +12,12 @@ a.bind('canplay', function () {
    this.play();
 });
 a.bind('ended', function(){
+    if(a[0]===this){
+        let audio = $('<audio controls src="'+src+'" id="'+id+'" autoplay></audio>');
+        $('#audioholder').append(audio);
+        a = $('#'+id);
+        id += 1;
+    }
     this.remove();
 });
 var id = 1;
@@ -25,11 +31,17 @@ function f() {
            this.play();
         });
         a.bind('ended', function(){
+            if(a[0]===this){
+                let audio = $('<audio controls src="'+src+'" id="'+id+'" autoplay></audio>');
+                $('#audioholder').append(audio);
+                a = $('#'+id);
+                id += 1;
+            }
             this.remove();
         });
         id += 1;
     }
 }
-setInterval(f, 200);
+setInterval(f, 250);
 </script>
 {% endblock %}
