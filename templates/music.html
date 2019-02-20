@@ -24,6 +24,13 @@ progress::-webkit-progress-value
     <span>{{ now.song_name }}</span>
     </div>
     <div class="row pull-right">
+    <div class="btn-group mr-3" role="group"><a class="btn btn-outline-primary" href="music/player" target="_blank"><i class="fa fa-play-circle" aria-hidden="true"></i></a>
+    </div>
+    <div class="btn-group mr-3" role="group">
+        <a class="btn btn-outline-primary" href="?command=vdown"><i class="fa fa-volume-down" aria-hidden="true"></i></a>
+        <a class="btn btn-outline-primary" href="#">{{ volume }}%</a>
+        <a class="btn btn-outline-primary" href="?command=vup"><i class="fa fa-volume-up" aria-hidden="true"></i></a>
+    </div>
     <div class="btn-group mr-3" role="group">
         {% if paused %}
         <a class="btn btn-outline-primary" href="?command=start"><i class="fa fa-play" aria-hidden="true"></i></a>
@@ -39,10 +46,6 @@ progress::-webkit-progress-value
         </button>
     </form>
     </div>
-{#    <div class="btn-group pull-right" role="group">#}
-{#        <a class="btn btn-outline-primary" href="?command=vup"><i class="fa fa-volume-up" aria-hidden="true"></i></a>#}
-{#        <a class="btn btn-outline-primary" href="?command=vdown"><i class="fa fa-volume-down" aria-hidden="true"></i></a>#}
-{#    </div>#}
 </div>
 <progress value='{{ now.time }}' max='{{ now.tottime }}' class="col-12" id="id_progress"></progress>
 {% if data_list %}
@@ -79,7 +82,11 @@ progress::-webkit-progress-value
 <script>
     $('#message').hide();
     var starttime = new Date();
-    starttime = starttime.getTime()-$('#id_progress').val()*1000;
+    {% if now.time %}
+    starttime = starttime.getTime() - {{ now.time }} * 1000;
+    {% else %}
+    starttime = starttime.getTime();
+    {% endif %}
 
     function ajaxSubmit() {
         $('#message').html('申请已发出，请等待');
@@ -92,23 +99,27 @@ progress::-webkit-progress-value
                 'name': $('#id_name').val(),
             },
             success: function (arg) {
-                window.location = "/music"
+                window.location = "/music";
             }
         });
         $('#id_name').val('');
     }
-    {% if not paused %}
+    {% if data_list and not paused %}
     var refresh = false;
     function updateProgress(){
         let p = $('#id_progress');
-        let time = new Date();
-        p.val((time.getTime()-starttime)/1000);
-        if(!refresh && p.attr('max') - p.attr('value') < 0.2){
+        let timenow = new Date();
+        p.val((timenow.getTime()-starttime)/1000);
+        if(!refresh && p.attr('max') - (timenow.getTime()-starttime)/1000 < -1){
             refresh = true;
-            setTimeout("window.location = '/music';", 1000);
+            window.location = '/music';
         }
     }
     setInterval("updateProgress();", 200);
     {% endif %}
+    var p = $("progress");
+    p.bind("mouseup",function(a){
+        window.location = '/music?offset='+a.offsetX/p.innerWidth();
+    });
 </script>
 {% endblock %}
