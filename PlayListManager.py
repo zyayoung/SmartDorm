@@ -141,107 +141,6 @@ class PlayListManager:
             if code['code'] == 200:
                 song_id = code['result']['songs'][0]['id']
                 self.add_song_by_id(song_id)
-                # wait
-                while 'addtime' not in self.now_playing or self.now_playing['addtime'] == old_time:
-                    time.sleep(0.01)
-        except Exception as e:  # 防炸
-            print('shit')
-            print(e)
-
-    def add_song_by_av(self, aid):
-        print('Adding', aid)
-        try:
-            song_id = int(aid)
-            if song_id in self.now_adding:
-                return
-            self.now_adding.append(song_id)
-            old_time = self.now_playing['addtime'] if 'addtime' in self.now_playing else 0
-            # check id
-            old_obj = self.db.get_object_by_key('song_id', 'av{}'.format(song_id))
-            if old_obj:
-                self.q_new_song.put(old_obj)
-                self.play_next = True
-                self.now_adding.remove(song_id)
-                # wait
-                while 'addtime' not in self.now_playing or self.now_playing['addtime'] == old_time:
-                    time.sleep(0.01)
-                return
-
-            # get song url
-            req = Request('http://api.imjad.cn/bilibili/v2/?aid=' + str(song_id) + '&type=archieve', headers=HEAD)
-            info = json.loads(
-                urlopen(req).read().decode('utf-8')
-            )
-            if info['code'] != 0:
-                print('[error]')
-                print(info)
-                return
-
-            song_name = info['data']['title']
-            song_tname = info['data']['tname']
-            song_uploader = info['data']['owner']['name']
-
-
-            # download song
-            mp3_file_name = 'av%012d' % song_id + '.mp3'
-
-            print('Downloading...')
-            print('songName: ' + song_name)
-            print('songUploader: ' + song_uploader)
-            req = Request('http://api.bilibili.com/playurl?callback=callbackfunction&aid={}&page=1&platform=html5&quality=1'.format(song_id), headers=HEAD)
-            song_url = json.loads(
-                urlopen(req).read().decode('utf-8')
-            )['durl'][0]['url']
-            print('songUrl: ' + song_url)
-            req = Request(song_url, headers=HEAD)
-            if os.path.exists(os.path.join(self.song_path, mp3_file_name)):
-                os.remove(os.path.join(self.song_path, mp3_file_name))
-            savep = subprocess.Popen(
-                ["ffmpeg", "-i", "pipe:0", os.path.join(self.song_path, mp3_file_name)],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-            )
-            tmp_file = urlopen(req)
-            while True:
-                buf = tmp_file.read(128)
-                savep.stdin.write(buf)
-                savep.stdin.flush()
-                if len(buf) < 128 or buf[-1] == b'\0':
-                    break
-
-            savep.stdin.write(b'\0')
-            savep.stdin.flush()
-            time.sleep(1)
-            savep.send_signal(signal.SIGINT)
-            print("downloaded")
-            try:
-                savep.wait(timeout=1)
-            except subprocess.TimeoutExpired:
-                savep.terminate()
-                pass
-            savep.kill()
-            new_song_obj = {
-                'mp3_file_name': mp3_file_name,
-                'song_url': song_url,
-                'song_name': song_name,
-                'song_id': 'av{}'.format(song_id),
-                'states': 'downloaded',
-                'ar': song_uploader,
-                'al': song_tname,
-                'detail': info,
-                'ori': "https://www.bilibili.com/video/av{}".format(song_id),
-            }
-            self.db.append(new_song_obj)
-            self.db.save()
-
-            # push q_new_song
-            self.q_new_song.put(new_song_obj)
-            self.next()
-            self.now_adding.remove(song_id)
-            # wait
-            while 'addtime' not in self.now_playing or self.now_playing['addtime'] == old_time:
-                time.sleep(0.01)
         except Exception as e:  # 防炸
             print('shit')
             print(e)
@@ -316,7 +215,7 @@ class PlayListManager:
             savep.kill()
             new_song_obj = {
                 'mp3_file_name': mp3_file_name,
-                'song_url': song_url,
+                'song_url': '',
                 'song_name': song_name,
                 'song_id': 'av{}'.format(song_id),
                 'states': 'downloaded',
@@ -394,9 +293,6 @@ class PlayListManager:
             self.q_new_song.put(new_song_obj)
             self.next()
             self.now_adding.remove(song_id)
-            # wait
-            while 'addtime' not in self.now_playing or self.now_playing['addtime'] == old_time:
-                time.sleep(0.01)
         except Exception as e:  # 防炸
             print('shit')
             print(e)
