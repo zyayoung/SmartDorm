@@ -176,46 +176,79 @@ class PlayListManager:
 
             # download song
             mp3_file_name = 'av%012d' % song_id + '.mp3'
+            tmp_file_name = 'av%012d' % song_id
 
             print('Downloading...')
             print('songName: ' + song_name)
             print('songUploader: ' + song_uploader)
-            req = Request('http://api.bilibili.com/playurl?callback=callbackfunction&aid={}&page=1&platform=html5&quality=1'.format(song_id), headers=HEAD)
-            song_url = json.loads(
-                urlopen(req).read().decode('utf-8')
-            )['durl'][0]['url']
-            print('songUrl: ' + song_url)
-            req = Request(song_url, headers=HEAD)
-            if os.path.exists(os.path.join(self.song_path, mp3_file_name)):
-                os.remove(os.path.join(self.song_path, mp3_file_name))
-            savep = subprocess.Popen(
-                ["ffmpeg", "-i", "pipe:0", os.path.join(self.song_path, mp3_file_name)],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.STDOUT,
-            )
-            tmp_file = urlopen(req)
-            while True:
-                buf = tmp_file.read(1024)
-                savep.stdin.write(buf)
-                savep.stdin.flush()
-                if len(buf) < 1024 or buf[-1] == b'\0':
-                    break
-
-            savep.stdin.write(b'\0')
-            savep.stdin.flush()
-            time.sleep(1)
-            savep.send_signal(signal.SIGINT)
-            print("downloaded")
-            try:
-                savep.wait(timeout=1)
-            except subprocess.TimeoutExpired:
-                savep.terminate()
-                pass
-            savep.kill()
+            # req = Request('http://api.bilibili.com/playurl?callback=callbackfunction&aid={}&page=1&platform=html5&quality=1'.format(song_id), headers=HEAD)
+            # song_url = json.loads(
+            #     urlopen(req).read().decode('utf-8')
+            # )['durl'][0]['url']
+            # print('songUrl: ' + song_url)
+            # req = Request(song_url, headers=HEAD)
+            # if os.path.exists(os.path.join(self.song_path, mp3_file_name)):
+            #     os.remove(os.path.join(self.song_path, mp3_file_name))
+            # savep = subprocess.Popen(
+            #     ["ffmpeg", "-i", "pipe:0", os.path.join(self.song_path, mp3_file_name)],
+            #     stdin=subprocess.PIPE,
+            #     stdout=subprocess.DEVNULL,
+            #     stderr=subprocess.STDOUT,
+            # )
+            # tmp_file = urlopen(req)
+            # while True:
+            #     buf = tmp_file.read(1024)
+            #     savep.stdin.write(buf)
+            #     savep.stdin.flush()
+            #     if len(buf) < 1024 or buf[-1] == b'\0':
+            #         break
+            #
+            # savep.stdin.write(b'\0')
+            # savep.stdin.flush()
+            # time.sleep(1)
+            # savep.send_signal(signal.SIGINT)
+            # print("downloaded")
+            # try:
+            #     savep.wait(timeout=1)
+            # except subprocess.TimeoutExpired:
+            #     savep.terminate()
+            #     pass
+            # savep.kill()
+            print(' '.join([
+                'you-get',
+                "https://www.bilibili.com/video/av{}".format(song_id),
+                "-f", "-O", tmp_file_name
+            ]))
+            downloadp = subprocess.Popen([
+                'you-get',
+                "https://www.bilibili.com/video/av{}".format(song_id),
+                "-f", "-O", tmp_file_name
+            ])
+            downloadp.wait()
+            downloadp.kill()
+            if os.path.exists(tmp_file_name+".mp4"):
+                video_file_name = tmp_file_name+".mp4"
+                savep = subprocess.Popen(
+                    ["ffmpeg", "-i", tmp_file_name+".mp4", os.path.join(self.song_path, mp3_file_name)],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.STDOUT,
+                )
+                savep.wait()
+                savep.kill()
+            elif os.path.exists(tmp_file_name+".flv"):
+                video_file_name = tmp_file_name+".flv"
+                savep = subprocess.Popen(
+                    ["ffmpeg", "-i", tmp_file_name+".flv", os.path.join(self.song_path, mp3_file_name)],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.STDOUT,
+                )
+                savep.wait()
+                savep.kill()
+            else:
+                return
             new_song_obj = {
                 'mp3_file_name': mp3_file_name,
-                'song_url': '',
+                'video_file_name': video_file_name,
                 'song_name': song_name,
                 'song_id': 'av{}'.format(song_id),
                 'states': 'downloaded',
