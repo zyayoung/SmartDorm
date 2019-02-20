@@ -8,7 +8,7 @@
 {% block script %}
 <script>
 var a = $('#0');
-a.bind('canplay', function () {
+a.bind('canplaythrough', function () {
    this.play();
 });
 a.bind('ended', function(){
@@ -27,7 +27,7 @@ function f() {
         let audio = $('<audio controls src="'+src+'" id="'+id+'" autoplay></audio>');
         $('#audioholder').append(audio);
         a = $('#'+id);
-        a.bind('canplay', function () {
+        a.bind('canplaythrough', function () {
            this.play();
         });
         a.bind('ended', function(){

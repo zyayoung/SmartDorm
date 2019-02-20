@@ -266,6 +266,7 @@ class PlayListManager:
             self.now_adding.remove(song_id)
         except Exception as e:  # 防炸
             print('shit')
+            self.now_adding.remove(song_id)
             print(e)
 
     def add_song_by_id(self, song_id):
