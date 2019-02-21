@@ -59,12 +59,7 @@ def upload_file():
         # check if the post request has the file part
         if 'file' not in request.files:
             return 'No file part'
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            return 'No selected file'
-        if file:
+        for idx, file in enumerate(request.files.getlist()):
             song_id = random.randint(1000000, 9999999)
             filename = 'up{}.mp3'.format(song_id)
             while os.path.exists(os.path.join(var_set['download_path'], 'song', filename)):
@@ -74,9 +69,9 @@ def upload_file():
             play_list_manager.add_song_by_filename(
                 filename,
                 song_id=song_id,
-                al=request.form.get('al'),
-                ar=request.form.get('ar'),
-                song_name=request.form.get('name'),
+                al=request.form.get('al{}'.format(idx)),
+                ar=request.form.get('ar{}'.format(idx)),
+                song_name=request.form.get('name{}'.format(idx)),
             )
             return redirect('/music')
     return render_template('upload.html')

@@ -3,7 +3,6 @@ import os
 import time
 import re
 import threading as td
-from queue import Queue
 import random
 from urllib.request import urlopen, urlretrieve, Request
 from urllib.parse import urlencode
@@ -49,7 +48,7 @@ class PlayListManager:
         print('Initializing play list...')
         self.play_list_ids = []
         self.file_names = []
-        self.q_new_song = Queue()
+        self.q_new_song = []
         self.play_next = False
         self.pause = False
         self.offset = None
@@ -147,15 +146,15 @@ class PlayListManager:
 
     def add_song_by_av(self, aid):
         print('Adding', aid)
+        song_id = int(aid)
         try:
-            song_id = int(aid)
             if song_id in self.now_adding:
                 return
             self.now_adding.append(song_id)
             # check id
             old_obj = self.db.get_object_by_key('song_id', 'av{}'.format(song_id))
             if old_obj:
-                self.q_new_song.put(old_obj)
+                self.q_new_song.append(old_obj)
                 self.next()
                 self.now_adding.remove(song_id)
                 return
@@ -261,7 +260,7 @@ class PlayListManager:
             self.db.save()
 
             # push q_new_song
-            self.q_new_song.put(new_song_obj)
+            self.q_new_song.append(new_song_obj)
             self.next()
             self.now_adding.remove(song_id)
         except Exception as e:  # 防炸
@@ -271,15 +270,15 @@ class PlayListManager:
 
     def add_song_by_id(self, song_id):
         print('Adding', song_id)
+        song_id = int(song_id)
         try:
-            song_id = int(song_id)
             if song_id in self.now_adding:
                 return
             self.now_adding.append(song_id)
             # check id
             old_obj = self.db.get_object_by_key('song_id', song_id)
             if old_obj:
-                self.q_new_song.put(old_obj)
+                self.q_new_song.append(old_obj)
                 self.next()
                 self.now_adding.remove(song_id)
                 return
@@ -324,7 +323,7 @@ class PlayListManager:
             self.db.save()
 
             # push q_new_song
-            self.q_new_song.put(new_song_obj)
+            self.q_new_song.append(new_song_obj)
             self.next()
             self.now_adding.remove(song_id)
         except Exception as e:  # 防炸
@@ -337,7 +336,7 @@ class PlayListManager:
             # check id
             old_obj = self.db.get_object_by_key('song_id', filename)
             if old_obj:
-                self.q_new_song.put(old_obj)
+                self.q_new_song.append(old_obj)
                 self.next()
                 return
             new_song_obj = {
@@ -353,7 +352,7 @@ class PlayListManager:
             self.db.save()
 
             # push q_new_song
-            self.q_new_song.put(new_song_obj)
+            self.q_new_song.append(new_song_obj)
             self.next()
 
     def del_song_by_id_or_av(self, song_id):
@@ -390,8 +389,8 @@ class PlayListManager:
                 time.sleep(0.1)
 
             # get next song
-            if not self.q_new_song.empty():
-                nxt_song = self.q_new_song.get()
+            if self.q_new_song:
+                nxt_song = self.q_new_song.pop(0)
             else:
                 nxt_song = random.choice(self.db.objects)
             self.now_playing = nxt_song
