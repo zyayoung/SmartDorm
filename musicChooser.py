@@ -65,15 +65,18 @@ def upload_file():
         if file.filename == '':
             return 'No selected file'
         if file:
-            filename = 'up{}.mp3'.format(random.randint(100000000, 999999999))
+            song_id = random.randint(1000000, 9999999)
+            filename = 'up{}.mp3'.format(song_id)
             while os.path.exists(os.path.join(var_set['download_path'], 'song', filename)):
-                filename = 'up{}.mp3'.format(random.randint(100000000, 999999999))
+                song_id = random.randint(1000000, 9999999)
+                filename = 'up{}.mp3'.format(song_id)
             file.save(os.path.join(var_set['download_path'], 'song', filename))
             play_list_manager.add_song_by_filename(
                 filename,
-                al=request.args.get('al'),
-                ar=request.args.get('ar'),
-                song_name=request.args.get('name'),
+                song_id=song_id,
+                al=request.args.form('al'),
+                ar=request.args.form('ar'),
+                song_name=request.args.form('name'),
             )
             return redirect('/music')
     return render_template('upload.html')

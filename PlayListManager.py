@@ -331,7 +331,7 @@ class PlayListManager:
             print('shit')
             print(e)
 
-    def add_song_by_filename(self, filename, song_name=None, ar=None, al=None, detail_info=None):
+    def add_song_by_filename(self, filename, song_name=None, ar=None, al=None, detail_info=None, song_id=None):
             if not filename.startswith('up'):
                 return
             # check id
@@ -342,7 +342,7 @@ class PlayListManager:
                 return
             new_song_obj = {
                 'mp3_file_name': filename,
-                'song_id': filename,
+                'song_id': song_id,
                 'song_name': song_name,
                 'states': 'downloaded',
                 'ar': ar,
