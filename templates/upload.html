@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Upload Music{% endblock %}
+{% block content %}
+<p class="lead">Upload</p>
+<form class="form-add" method="post" enctype="multipart/form-data">
+    <div class="form-group row">
+        <label class="col-3 col-form-label">File</label>
+        <div class="col-9">
+            <input class="file-upload" type="file" name="file" id="id_file" accept="audio/mp3">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-3 col-form-label">Name</label>
+        <div class="col-9">
+            <input class="form-control" name="name" id="id_name">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-3 col-form-label">Album</label>
+        <div class="col-9">
+            <input class="form-control" name="al" id="id_al">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-3 col-form-label">Artist</label>
+        <div class="col-9">
+            <input class="form-control" name="ar" id="id_ar">
+        </div>
+    </div>
+    <input type=submit value=Upload>
+</form>
+{% endblock %}
+{% block script %}
+<script src="https://cdn.bootcss.com/jsmediatags/3.9.0/jsmediatags.min.js"></script>
+<script>
+$("#id_file").change(function(e){
+    $("#id_name").val(e.target.files[0].name.split('.')[0]);
+    jsmediatags.read(e.target.files[0], {
+        onSuccess: function(tag) {
+            {#console.log(tag);#}
+            $("#id_name").val(tag.tags.title);
+            $("#id_al").val(tag.tags.album);
+            $("#id_ar").val(tag.tags.artist);
+        },
+        onError: function(error) {
+            console.log(error);
+        }
+    });
+});
+</script>
+{% endblock %}

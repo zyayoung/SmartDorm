@@ -331,6 +331,31 @@ class PlayListManager:
             print('shit')
             print(e)
 
+    def add_song_by_filename(self, filename, song_name=None, ar=None, al=None, detail_info=None):
+            if not filename.startswith('up'):
+                return
+            # check id
+            old_obj = self.db.get_object_by_key('song_id', filename)
+            if old_obj:
+                self.q_new_song.put(old_obj)
+                self.next()
+                return
+            new_song_obj = {
+                'mp3_file_name': filename,
+                'song_id': filename,
+                'song_name': song_name,
+                'states': 'downloaded',
+                'ar': ar,
+                'al': al,
+                'detail': detail_info,
+            }
+            self.db.append(new_song_obj)
+            self.db.save()
+
+            # push q_new_song
+            self.q_new_song.put(new_song_obj)
+            self.next()
+
     def del_song_by_id_or_av(self, song_id):
         # del song files
         try:

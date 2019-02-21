@@ -1,4 +1,6 @@
-from flask import Flask, request, render_template, redirect
+from flask import Flask, flash, request, render_template, redirect
+from werkzeug.utils import secure_filename
+import os
 from queue import Queue
 import argparse
 import random
@@ -51,6 +53,39 @@ def music_player():
     return render_template('player.html', src=var_set['http_src'])
 
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ['mp3']
+
+
+@app.route('/music/upload', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            return 'No file part'
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            return 'No selected file'
+        if file and allowed_file(file.filename):
+            filename = 'up{}'.format(random.randint(100000000, 999999999))
+            while os.path.exists(os.path.join(var_set['download_path'], filename)):
+                filename = 'up{}'.format(random.randint(100000000, 999999999))
+            file.save(os.path.join(var_set['download_path'], filename))
+            play_list_manager.add_song_by_filename(
+                filename,
+                al=request.args.get('al'),
+                ar=request.args.get('ar'),
+                song_name=request.args.get('name'),
+            )
+            return redirect('/music')
+        else:
+            return "File type not allowed!"
+    return render_template('upload.html')
+
+
 @app.route('/music')
 def music():
     if request.args.get('offset') is not None:
@@ -61,6 +96,8 @@ def music():
         song_id = request.args.get('id')
         if song_id.startswith('av'):
             play_list_manager.add_song_by_av(int(song_id[2:]))
+        if song_id.startswith('up'):
+            play_list_manager.add_song_by_filename(song_id)
         else:
             play_list_manager.add_song_by_id(int(song_id))
         return redirect('/music')
