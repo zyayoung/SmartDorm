@@ -74,9 +74,9 @@ def upload_file():
             play_list_manager.add_song_by_filename(
                 filename,
                 song_id=song_id,
-                al=request.args.form('al'),
-                ar=request.args.form('ar'),
-                song_name=request.args.form('name'),
+                al=request.form.get('al'),
+                ar=request.form.get('ar'),
+                song_name=request.form.get('name'),
             )
             return redirect('/music')
     return render_template('upload.html')
