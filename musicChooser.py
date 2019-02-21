@@ -53,11 +53,6 @@ def music_player():
     return render_template('player.html', src=var_set['http_src'])
 
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ['mp3']
-
-
 @app.route('/music/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -69,10 +64,10 @@ def upload_file():
         # submit an empty part without filename
         if file.filename == '':
             return 'No selected file'
-        if file and allowed_file(file.filename):
-            filename = 'up{}'.format(random.randint(100000000, 999999999)+'.mp3')
+        if file:
+            filename = 'up{}.mp3'.format(random.randint(100000000, 999999999))
             while os.path.exists(os.path.join(var_set['download_path'], 'song', filename)):
-                filename = 'up{}'.format(random.randint(100000000, 999999999)+'.mp3')
+                filename = 'up{}.mp3'.format(random.randint(100000000, 999999999))
             file.save(os.path.join(var_set['download_path'], 'song', filename))
             play_list_manager.add_song_by_filename(
                 filename,
@@ -81,8 +76,6 @@ def upload_file():
                 song_name=request.args.get('name'),
             )
             return redirect('/music')
-        else:
-            return "File type not allowed!"
     return render_template('upload.html')
 
 
