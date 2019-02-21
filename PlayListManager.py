@@ -359,6 +359,8 @@ class PlayListManager:
     def del_song_by_id_or_av(self, song_id):
         # del song files
         try:
+            if self.now_playing['song_id'] == song_id:
+                self.next()
             obj = self.db.get_object_by_key('song_id', song_id)
             song_path = os.path.join(var_set['download_path'], 'song')
             mp3_file_path = os.path.join(song_path, obj['mp3_file_name'])
