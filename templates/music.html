@@ -20,9 +20,6 @@ progress::-webkit-progress-value
 {% block content %}
 <div class="alert alert-warning" id="message"></div>
 <div class="text-center">
-    <div class="pull-left">
-    <span>{{ now.song_name }}</span>
-    </div>
     <div class="row pull-right">
     <div class="btn-group mr-3" role="group"><a class="btn btn-outline-primary" href="music/player" target="_blank"><i class="fa fa-play-circle" aria-hidden="true"></i></a>
     </div>
@@ -49,7 +46,43 @@ progress::-webkit-progress-value
 </div>
 <progress value='{{ now.time }}' max='{{ now.tottime }}' class="col-12" id="id_progress"></progress>
 {% if data_list %}
-<p></p>
+<p class="lead">Playlist:</p>
+<table class="table table-striped table-sm">
+    <thead>
+        <th class="d-none d-lg-table-cell">Id</th>
+        <th>Name</th>
+        <th class="d-none d-sm-table-cell">Artist</th>
+        <th class="d-none d-md-table-cell">Album</th>
+        <th>Del</th>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="d-none d-lg-table-cell"><a href="{{ now.ori }}">{{ now.song_id }}</a></td>
+            <td><a href="?id={{ now.song_id }}">{{ now.song_name }}</a></td>
+            <td class="d-none d-sm-table-cell">{{ now.ar }}</td>
+            <td class="d-none d-md-table-cell">{{ now.al }}</td>
+            <td>
+                <a class="btn btn-outline-primary" href="?command=next">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                </a>
+            </td>
+        </tr>
+        {% for music in play_list %}
+        <tr>
+            <td class="d-none d-lg-table-cell"><a href="{{ music.ori }}">{{ music.song_id }}</a></td>
+            <td><a href="?id={{ music.song_id }}">{{ music.song_name }}</a></td>
+            <td class="d-none d-sm-table-cell">{{ music.ar }}</td>
+            <td class="d-none d-md-table-cell">{{ music.al }}</td>
+            <td>
+                <a class="btn btn-outline-primary" href="music/remove_from_playlist?id={{ music.song_id }}">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p class="lead">Music List:</p>
 <table class="table table-striped table-sm">
     <thead>
         <th class="d-none d-lg-table-cell">Id</th>

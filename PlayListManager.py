@@ -155,7 +155,6 @@ class PlayListManager:
             old_obj = self.db.get_object_by_key('song_id', 'av{}'.format(song_id))
             if old_obj:
                 self.q_new_song.append(old_obj)
-                self.next()
                 self.now_adding.remove(song_id)
                 return
 
@@ -261,7 +260,6 @@ class PlayListManager:
 
             # push q_new_song
             self.q_new_song.append(new_song_obj)
-            self.next()
             self.now_adding.remove(song_id)
         except Exception as e:  # 防炸
             print('shit')
@@ -279,7 +277,6 @@ class PlayListManager:
             old_obj = self.db.get_object_by_key('song_id', song_id)
             if old_obj:
                 self.q_new_song.append(old_obj)
-                self.next()
                 self.now_adding.remove(song_id)
                 return
 
@@ -324,20 +321,18 @@ class PlayListManager:
 
             # push q_new_song
             self.q_new_song.append(new_song_obj)
-            self.next()
             self.now_adding.remove(song_id)
         except Exception as e:  # 防炸
             print('shit')
             print(e)
 
-    def add_song_by_filename(self, filename, song_name=None, ar=None, al=None, detail_info=None, song_id=None):
+    def add_song_by_filename(self, filename, song_name=None, ar='', al='', detail_info=None, song_id=None):
             if not filename.startswith('up'):
                 return
             # check id
             old_obj = self.db.get_object_by_key('song_id', filename)
             if old_obj:
                 self.q_new_song.append(old_obj)
-                self.next()
                 return
             new_song_obj = {
                 'mp3_file_name': filename,
@@ -353,7 +348,6 @@ class PlayListManager:
 
             # push q_new_song
             self.q_new_song.append(new_song_obj)
-            self.next()
 
     def del_song_by_id_or_av(self, song_id):
         # del song files

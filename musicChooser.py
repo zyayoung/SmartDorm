@@ -120,7 +120,8 @@ def music():
         now=play_list_manager.now_playing,
         paused=play_list_manager.pause,
         volume=play_list_manager.volume,
-        data_list=play_list_manager.db.objects
+        data_list=play_list_manager.db.objects,
+        play_list=play_list_manager.q_new_song,
     )
 
 
