@@ -57,7 +57,7 @@ def music_player():
 def remove_from_playlist():
     if request.args.get('id') is not None and request.args.get('order') is not None:
         song_id = request.args.get('id')
-        order = request.args.get('order')
+        order = int(request.args.get('order'))
         if str(play_list_manager.q_new_song[order]['song_id']) == song_id:
             play_list_manager.q_new_song.pop(order)
     return redirect('/music')
@@ -97,7 +97,7 @@ def music():
         song_id = request.args.get('id')
         if song_id.startswith('av'):
             play_list_manager.add_song_by_av(int(song_id[2:]))
-        if song_id.startswith('up'):
+        elif song_id.startswith('up'):
             play_list_manager.add_song_by_filename(song_id)
         else:
             play_list_manager.add_song_by_id(int(song_id))
