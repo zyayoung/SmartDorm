@@ -59,7 +59,7 @@ def upload_file():
         # check if the post request has the file part
         if 'file' not in request.files:
             return 'No file part'
-        for idx, file in enumerate(request.files.getlist()):
+        for idx, file in enumerate(request.files.getlist('file')):
             song_id = random.randint(1000000, 9999999)
             filename = 'up{}.mp3'.format(song_id)
             while os.path.exists(os.path.join(var_set['download_path'], 'song', filename)):
