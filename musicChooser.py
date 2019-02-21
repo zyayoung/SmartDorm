@@ -73,7 +73,7 @@ def upload_file():
                 ar=request.form.get('ar{}'.format(idx)),
                 song_name=request.form.get('name{}'.format(idx)),
             )
-            return redirect('/music')
+        return redirect('/music')
     return render_template('upload.html')
 
 
