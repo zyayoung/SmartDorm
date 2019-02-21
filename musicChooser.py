@@ -23,7 +23,7 @@ q = Queue()
 
 @app.route("/")
 def hello():
-    return render_template('index.html')
+    return redirect('/music')
 
 
 @app.route("/add_by_name")
@@ -54,7 +54,7 @@ def music_player():
 
 
 @app.route('/music/remove_from_playlist')
-def music_player():
+def remove_from_playlist():
     if request.args.get('id') is not None and request.args.get('order') is not None:
         song_id = request.args.get('id')
         order = request.args.get('order')
