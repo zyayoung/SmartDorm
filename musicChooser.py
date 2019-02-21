@@ -53,6 +53,16 @@ def music_player():
     return render_template('player.html', src=var_set['http_src'])
 
 
+@app.route('/music/remove_from_playlist')
+def music_player():
+    if request.args.get('id') is not None and request.args.get('order') is not None:
+        song_id = request.args.get('id')
+        order = request.args.get('order')
+        if str(play_list_manager.q_new_song[order]['song_id']) == song_id:
+            play_list_manager.q_new_song.pop(order)
+    return redirect('/music')
+
+
 @app.route('/music/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':

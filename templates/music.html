@@ -74,8 +74,8 @@ progress::-webkit-progress-value
             <td class="d-none d-sm-table-cell">{{ music.ar }}</td>
             <td class="d-none d-md-table-cell">{{ music.al }}</td>
             <td>
-                <a class="btn btn-outline-primary" href="music/remove_from_playlist?id={{ music.song_id }}">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
+                <a class="btn btn-outline-primary" href="music/remove_from_playlist?id={{ music.song_id }}&order={{ loop.index0 }}">
+                    <i class="fa fa-remove" aria-hidden="true"></i>
                 </a>
             </td>
         </tr>
