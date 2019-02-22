@@ -1,5 +1,4 @@
-from flask import Flask, flash, request, render_template, redirect
-from werkzeug.utils import secure_filename
+from flask import Flask, request, render_template, redirect
 import os
 from queue import Queue
 import argparse
@@ -7,6 +6,10 @@ import random
 import string
 import PlayListManager
 import json
+
+from urllib.request import Request, build_opener, HTTPCookieProcessor
+import re
+import time
 
 var_set = json.load(open('config.json'))
 play_list_manager = PlayListManager.PlayListManager()
@@ -133,6 +136,47 @@ def music():
         data_list=play_list_manager.db.objects,
         play_list=play_list_manager.q_new_song,
     )
+
+
+@app.route('/ele')
+def ele():
+    cookies = HTTPCookieProcessor()
+    opener = build_opener(cookies)
+    req = Request(
+        url=r'http://202.120.1.29:8080/AppQuery/AppInterface.asmx',
+        headers={
+            'Content-Type': 'text/xml; charset=utf-8'
+        },
+        data=(
+            """<?xml version="1.0" encoding="utf-8"?>
+            <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+              <soap12:Body>
+                <GetDayHardRecordInfo_New xmlns="http://tempuri.org/">
+                  <PhoneSignKey>"""+var_set['PhoneSignKey']+"""</PhoneSignKey>
+                  <RoomDm>"""+var_set['RoomDm']+"""</RoomDm>
+                  <Mdid>"""+var_set['Mdid']+"""</Mdid>
+                </GetDayHardRecordInfo_New>
+              </soap12:Body>
+            </soap12:Envelope>
+            """
+        ).encode()
+    )
+
+    m = re.search(
+        r"<GetDayHardRecordInfo_NewResult>(.+?)</GetDayHardRecordInfo_NewResult>",
+        opener.open(req).read().decode()
+    )
+    data = []
+    for d in json.loads(m.group(1))['data']:
+        t = time.mktime(time.strptime(d['hdsavetime'], '%Y/%m/%d %H:%M:%S'))
+        # day -= 1
+        if time.localtime(t).tm_hour < 6:
+            t -= time.localtime(t).tm_hour * 3600 + time.localtime(t).tm_min * 60 + time.localtime(t).tm_sec + 1
+
+        # we only show 4 month
+        if time.time() - t < 3600 * 24 * 30 * 4:
+            data.append([t, d['used']])
+    return render_template('ele.html', data=data)
 
 
 if __name__ == "__main__":
