@@ -209,7 +209,7 @@ def trans():
             out = cache[__to_trans]
         else:
             __to_trans = re.sub(r'\r?\n\d+\r?\n', '\r\n', __to_trans)
-            print([__to_trans])
+            # print([__to_trans])
             to_trans = []
 
             for _to_trans in re.split(r'\.\r?\n', __to_trans):
