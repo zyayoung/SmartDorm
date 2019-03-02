@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Ele{% endblock %}
+{% block content %}
+<p class="lead">Translation</p>
+<table class="table">
+<thead>
+<th>History</th>
+</thead>
+<tbody>
+{% for h in history %}
+    <tr><td><a href="?id={{ loop.index0 }}">{{ h.title }}</a></td></tr>
+{% endfor %}
+</tbody>
+</table>
+<form method="post">
+<textarea name="en" id="id_en" class="form-control" style="height: 60vh;"></textarea>
+<p></p>
+<button class="btn btn-outline-primary" type="submit">Submit</button>
+</form>
+{% endblock %}

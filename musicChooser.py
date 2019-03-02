@@ -2,12 +2,12 @@ from flask import Flask, request, render_template, redirect
 import os
 from queue import Queue
 import argparse
-import random
 import string
 import PlayListManager
+import random
 import json
-
-from urllib.request import Request, build_opener, HTTPCookieProcessor
+from urllib.request import Request, build_opener, HTTPCookieProcessor, urlopen, quote
+import hashlib
 import re
 import time
 
@@ -118,16 +118,6 @@ def music():
         elif command == 'vdown':
             play_list_manager.vdown()
         return redirect('/music')
-    re = '<p><a href="?command=start">start</a>&nbsp; \
-             <a href="?command=pause">pause</a>&nbsp; \
-             <a href="?command=next">next</a>&nbsp; \
-             <a href="?command=vup">vup</a>&nbsp; \
-             <a href="?command=vdown">vdown</a></p>'
-    for obj in play_list_manager.db.objects:
-        re += '<p>{id}.<a href="?id={id}">{name}</a></p>\n'.format(
-            id=obj['song_id'],
-            name=obj['song_name']
-        )
     return render_template(
         'music.html',
         now=play_list_manager.now_playing,
@@ -177,6 +167,72 @@ def ele():
         if time.time() - t < 3600 * 24 * 30 * 4:
             data.append([t, d['used']])
     return render_template('ele.html', data=data)
+
+
+def _trans(q):
+    appid = var_set['appid']  # 你的appid
+    secretKey = var_set['secretKey']  # 你的密钥
+    if not q:
+        return ''
+    myurl = 'http://api.fanyi.baidu.com/api/trans/vip/translate'
+    fromLang = 'en'
+    toLang = 'zh'
+    salt = random.randint(32768, 65536)
+
+    sign = appid+q+str(salt)+secretKey
+    m_MD5 = hashlib.md5(sign.encode('utf-8'))
+    sign = m_MD5.hexdigest()
+    myurl = myurl+'?appid='+appid+'&q=' + \
+        quote(q)+'&from='+fromLang+'&to='+toLang + \
+        '&salt='+str(salt)+'&sign='+sign
+    try:
+        response = urlopen(myurl).read()
+    except KeyError as e:
+        return '{} {}'.format(e, 'Network Error')
+    try:
+        return json.loads(response)['trans_result'][0]['dst']
+    except KeyError as e:
+        return '{} {}'.format(e, response)
+
+
+cache = {}
+trans_history = []
+
+
+@app.route('/trans', methods=['GET', 'POST'])
+def trans():
+    if request.args.get('id'):
+        return render_template('trans_result.html', out=cache[trans_history[int(request.args.get('id'))]['full_key']])
+    if request.method == 'POST':
+        __to_trans = request.form.get('en')
+        if __to_trans in cache:
+            out = cache[__to_trans]
+        else:
+            __to_trans = re.sub(r'\r?\n\d+\r?\n', '\r\n', __to_trans)
+            print([__to_trans])
+            to_trans = []
+
+            for _to_trans in re.split(r'\.\r?\n', __to_trans):
+                _to_trans = _to_trans.replace('\n', ' ').replace('\r', '')
+                if _to_trans and not _to_trans.endswith('.'):
+                    _to_trans = _to_trans + '.'
+                while _to_trans:
+                    cut_at = _to_trans[4000:].find('.') + 4000
+                    to_trans.append(_to_trans[:cut_at + 1])
+                    _to_trans = _to_trans[cut_at + 2:]
+
+            print(to_trans)
+            out = []
+            for line in to_trans:
+                out.append(_trans(line))
+            cache[request.form.get('en')] = out
+            trans_history.append({
+                'title': ' '.join(request.form.get('en').split()[:10]) + (' ...' if request.form.get('en').split()[10:] else ''),
+                'full_key': request.form.get('en'),
+            })
+        return render_template('trans_result.html', out=out)
+    else:
+        return render_template('trans_form.html', history=trans_history)
 
 
 if __name__ == "__main__":
