@@ -186,7 +186,7 @@ def _trans(q):
         quote(q)+'&from='+fromLang+'&to='+toLang + \
         '&salt='+str(salt)+'&sign='+sign
     try:
-        response = urlopen(myurl).read()
+        response = urlopen(myurl).read().decode()
     except KeyError as e:
         return '{} {}'.format(e, 'Network Error')
     try:
@@ -220,8 +220,6 @@ def trans():
                     cut_at = _to_trans[4000:].find('.') + 4000
                     to_trans.append(_to_trans[:cut_at + 1])
                     _to_trans = _to_trans[cut_at + 2:]
-
-            print(to_trans)
             out = []
             for line in to_trans:
                 out.append(_trans(line))

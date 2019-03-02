@@ -5,5 +5,7 @@
   "http_src": "http://sstia.tech:18090/test.mp3",
   "PhoneSignKey": "",
   "RoomDm": "",
-  "Mdid": ""
+  "Mdid": "",
+  "appid": "",
+  "secretKey": ""
 }
