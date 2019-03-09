@@ -10,6 +10,7 @@ from urllib.request import Request, build_opener, HTTPCookieProcessor, urlopen, 
 import hashlib
 import re
 import time
+import pickle
 
 var_set = json.load(open('config.json'))
 play_list_manager = PlayListManager.PlayListManager()
@@ -228,9 +229,17 @@ def trans():
                 'title': ' '.join(request.form.get('en').split()[:10]) + (' ...' if request.form.get('en').split()[10:] else ''),
                 'full_key': request.form.get('en'),
             })
+            f = open('data.pkl', 'w')
+            pickle.dump((cache, trans_history), f)
+            f.close()
         return render_template('trans_result.html', out=out)
     else:
         return render_template('trans_form.html', history=trans_history)
+
+
+@app.route('/srcnn')
+def srcnn():
+    return render_template('srcnn.html')
 
 
 if __name__ == "__main__":

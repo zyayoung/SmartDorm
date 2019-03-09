@@ -1,10 +1,96 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}SRCNN{% endblock %}
+{% block css %}
+<style>
+.small {
+    max-width: 25vw;
+}
+</style>
+{% endblock %}
+{% block content %}
+<div>
+    <table cellpadding="0" cellspacing="0" width="0" border="0" class="table">
+    <tbody><tr>
+        <td>
+            <img id="imageSrc" alt="No Image" hidden>
+            <canvas class="small" id="canvasInput"></canvas>
+        </td>
+        <td>
+            <canvas class="small" id="canvasBiqubic"></canvas>
+        </td>
+        <td>
+            <canvas class="small" id="canvasOutput"></canvas>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="caption">imageSrc <input type="file" id="fileInput" name="file" accept="image/*"></div>
+        </td>
+        <td></td>
+        <td>
+            <div class="caption">canvasOutput</div>
+        </td>
+    </tr>
+    </tbody></table>
+</div>
+{% endblock %}
+{% block script %}
+<script src="/static/opencv.js" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+<script type="text/javascript">
+let imgElement = document.getElementById('imageSrc');
+let inputElement = document.getElementById('fileInput');
+inputElement.addEventListener('change', (e) => {
+    imgElement.src = URL.createObjectURL(e.target.files[0]);
+}, false);
+tf.setBackend('cpu');
+imgElement.onload = async function() {
+    const model = await tf.loadLayersModel('/static/model.json');
+    const warmupResult = model.predict(tf.zeros([1,32,32,1]));
+    warmupResult.dataSync();
+    warmupResult.dispose();
+    let mat = cv.imread(imgElement);
+    cv.imshow('canvasInput', mat);
+
+    let output = new cv.Mat();
+    let dsize = new cv.Size(mat.size().width*2, mat.size().height*2);
+    cv.resize(mat, output, dsize, 0, 0, cv.INTER_CUBIC);
+
+
+    let ycc = new cv.Mat();
+    cv.cvtColor(output, ycc, cv.COLOR_RGB2YCrCb, 0);
+
+    let planes = new cv.MatVector();
+    cv.split(ycc, planes);
+    let y = planes.get(0);
+
+    let x = tf.tensor(y.data, [1,y.size().height,y.size().width,1], 'float32').div(255);
+    cv.imshow('canvasBiqubic', output);
+    // The second predict() will be much faster
+    let result = model.predict(x).clipByValue(0, 1).mul(255).asType('int32');
+    {#console.log(planes);#}
+    result.flatten().array().then(function(array) {
+            let new_planes = new cv.MatVector();
+            new_planes.push_back(cv.matFromArray(output.size().height - 12, output.size().width - 12, cv.CV_8UC1, array));
+            let rect = new cv.Rect(6, 6, y.size().width - 12, y.size().height - 12);
+            new_planes.push_back(planes.get(1).roi(rect));
+            new_planes.push_back(planes.get(2).roi(rect));
+            let new_output = new cv.Mat();
+            cv.merge(new_planes, new_output);
+            cv.cvtColor(new_output, new_output, cv.COLOR_YCrCb2RGB, 0);
+            cv.imshow('canvasOutput', new_output);
+        }
+    );
+    {#result.print();#}
+    {#cv.imshow('canvasBiqubic', output);#}
+    {##}
+    {#new_planes.push_back(#}
+    {#    cv.matFromArray(output.size().height-12, output.size().width-12, cv.CV_8UC1, result.flatten().array())#}
+    {#);#}
+
+    {#console.log(result.flatten().array());#}
+    {#console.log(output.size().width, output.size().height);#}
+
+};
+</script>
+{% endblock %}
